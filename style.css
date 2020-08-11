@@ -1,0 +1,20 @@
+html, body {margin: 0; height: 100%; overflow: hidden;}
+canvas {background-color:#eee}
+
+#top_div {
+    position: absolute;
+    top: 50;
+    left: 50;
+    z-index: 10;
+}
+#top_div h1 {
+    color:darkgray;
+    font-family: 'Baloo Chettan 2', cursive;
+    font-size: 1rem;
+}
+select {
+    color:black;
+    font-family: 'Baloo Chettan 2', cursive;
+    font-size: 1rem;
+}
+

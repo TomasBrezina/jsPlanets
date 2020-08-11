@@ -1,0 +1,118 @@
+<link rel="stylesheet" type="text/css" href="style.css">
+<link href="https://fonts.googleapis.com/css2?family=Baloo+Chettan+2&display=swap" rel="stylesheet">
+<html lang="en">
+    <body>
+        <div id="top_div">
+            <h1>Controls: Click, Move & Wheel</h1>
+            <select id="select">
+                <option value="sun_and_earth">Sun and earth</option>
+                <option value="two_planets">Two planets</option>
+                <option value="empty">Empty</option>
+            </select>
+        </div>  
+        <canvas id="ctx"></canvas>
+        <script src="code.js"></script>  
+        <script>
+            var selector = document.getElementById("select");
+            selector.onchange = function(){
+                let option = selector.options[selector.selectedIndex].value;
+                setPlanets(states[option])
+            }
+            // pos from middle of the screen
+            states = {
+                empty : [],
+                sun_and_earth : [
+                    {
+                        pos : {x:0, y:0},
+                        size : 40,
+                        color : "#E6E600",
+                        vel : {x:0,y:0},
+                        static : true
+                    },
+                    {
+                        pos : {x:300, y:0},
+                        size : 20,
+                        color : "#4780DE",
+                        vel : {x:0,y:27},
+                        static : false
+                    },
+                    {
+                        pos : {x:340, y:0},
+                        size : 5,
+                        color : "#BAB5B1",
+                        vel : {x:0,y:70},
+                        static : false
+                    }
+                ],
+                two_planets : [
+                    {
+                        pos : {x:-100, y:0},
+                        size : 50,
+                        color : "#2C3E50",
+                        vel : {x:0,y:32},
+                        static : false
+                    },
+                    {
+                        pos : {x:100, y:0},
+                        size : 50,
+                        color : "#2C3E50",
+                        vel : {x:0,y:-32},
+                        static : false
+                    },
+                    {
+                        pos : {x:0, y:0},
+                        size : 5,
+                        color : "#2C3E50",
+                        vel : {x:0,y:0},
+                        static : false
+                    },
+                ],
+                solar_system : [
+                    {
+                        //sun
+                        pos : {x:0, y:0},
+                        size : 30,
+                        color : "#E6E600",
+                        vel : {x:0,y:0},
+                        static : true
+                    },
+                    {
+                        //mercury
+                        pos : {x:57, y:0},
+                        size : 1,
+                        color : "#5F83A4",
+                        vel : {x:0,y:50},
+                        static : false
+                    },
+                    {
+                        //venus
+                        pos : {x:-100, y:0},
+                        size : 2,
+                        color : "#BAC3C1",
+                        vel : {x:0,y:-38},
+                        static : false
+                    },
+                    {
+                        //earth
+                        pos : {x:150, y:0},
+                        size : 2,
+                        color : "#0d98ba ",
+                        vel : {x:0,y:30.8},
+                        static : false
+                    },
+                    {
+                        //mars
+                        pos : {x:250, y:0},
+                        size : 1.5,
+                        color : "#D35400",
+                        vel : {x:0,y:23},
+                        static : false
+                    },
+                   
+                ]
+            }
+            setPlanets(states.solar_system);
+        </script> 
+    </body>
+</html>
+
