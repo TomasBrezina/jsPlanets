@@ -5,7 +5,7 @@ ctx.font = "30px Helvetica";
 
 
 // PLANET //
-function Planet(size=20) 
+function Planet(size=20, dim=2) 
 {
     this.pos = {x:0,y:0}; 
     this.force = {x: 0,y: 0};
@@ -15,7 +15,7 @@ function Planet(size=20)
 
     this.size = size;
     this.draw_size = 0;
-    this.mass = Math.pow(this.size,2) * Math.PI;
+    this.mass = Math.pow(this.size,dim) * Math.PI ;
 
     this.static = false;
 }
@@ -26,13 +26,13 @@ Planet.prototype = {
             this.draw_size = this.draw_size + ((this.size-this.draw_size)/10);
         }
     },
-    setSize : function(size){
+    setSize : function(size,dim){
         this.size = size;
-        this.mass = Math.pow(this.size,2) * Math.PI;
+        this.mass = Math.pow(this.size,dim) * Math.PI ;
     },
-    setMass : function(mass){
+    setMass : function(mass,dim){
         this.mass = mass;
-        this.size = parseInt(Math.sqrt(mass/Math.PI));
+        this.size = parseInt(Math.pow(mass/Math.PI, 1/dim));
     }
 };
 
@@ -57,20 +57,24 @@ Graphics.prototype = {
     draw_line : function(p1,p2,alpha=1,color="#000000"){
         ctx.globalAlpha = alpha;
         ctx.strokeStyle = color;
-        ctx.lineWidth = 2;
+        ctx.lineWidth = 3;
         ctx.beginPath();
         ctx.moveTo(p1.x, p1.y);
         ctx.lineTo(p2.x, p2.y);
         ctx.stroke();
     },
     draw_prediction : function(pred,alpha=1,color="#eeeeee") {
-        let grd_step = 0// alpha / pred.length;
+        let grd_cut = parseInt(pred.length - ((1/5) * pred.length));
+        let grd_step = 1 / (pred.length - grd_cut)
+        console.log("#", grd_cut, pred.length);
         ctx.fillStyle = color;
         for (i = 0; i < pred.length; i++) { 
             point = pred[i];
             ctx.globalAlpha = alpha;
-            ctx.fillRect(point[0]-1,point[1]-1,2,2);
-            alpha -= grd_step;
+            ctx.fillRect(point[0]-1.5,point[1]-1.5,3,3);
+            if (i > grd_cut) {
+                alpha -= grd_step;
+            }
         }
     }
 }
@@ -79,14 +83,16 @@ const Simulation = function(){
     this.planets = [];
     this.planets_to_merge = [];
 
+    this.mass_dim = 3;
     this.gravity_constant = 50;
     this.dt = 0.05;
-    this.prediction_dt = 0.1;
 }
 Simulation.prototype = {
     constructor : Simulation,
     gravity_prediction : function(p, steps=1){
         let prediction = [];
+        let dt = this.dt * 2;
+
         for (st = 0; st < steps; st++) {
             p.force.x = 0;
             p.force.y = 0;
@@ -102,7 +108,6 @@ Simulation.prototype = {
                 p.force.x += fx;
                 p.force.y += fy;
             }
-            let dt = this.prediction_dt;
             //acceleration
             let ax = p.force.x / p.mass;
             let ay = p.force.y / p.mass;
@@ -155,7 +160,7 @@ Simulation.prototype = {
             if (p1.mass < p2.mass) { 
                 [p1,p2] = [p2,p1];
             }
-            p1.setMass(p1.mass + p2.mass);
+            p1.setMass(p1.mass + p2.mass, this.mass_dim);
             to_remove.push(p2);
         }
         this.planets_to_merge = [];
@@ -203,19 +208,20 @@ const Controller = function(){
         this.mouse.pos = {x:ev.clientX, y:ev.clientY};
     };
     this.mousedown = function(ev){
-        console.log(this.object);
-
-        this.object = new Planet(20);
+        this.object = new Planet(20,simulation.mass_dim);
         this.object.pos = {x:ev.clientX, y:ev.clientY}
         this.object.draw_size = this.object.size;
     };
     this.mouseup = function(ev){
         if (this.object != null) {
             let pos = {x:ev.clientX, y:ev.clientY};
-            dx = this.object.pos.x - pos.x
-            dy = this.object.pos.y - pos.y
-            this.object.setSize(this.object.size);
-            this.object.vel = {x:dx, y:dy}
+            dx = (this.object.pos.x - pos.x);
+            dy = (this.object.pos.y - pos.y);
+            this.object.setSize(this.object.size, simulation.mass_dim);
+            this.object.vel = {
+                x:dx/simulation.dt/10,
+                y:dy/simulation.dt/10
+            }
             simulation.planets.push(this.object);
             this.object = null;
         }
@@ -232,26 +238,16 @@ const Controller = function(){
     };
 }
 function resize() {
+
     canvas.width = window.innerWidth;
     canvas.height = window.innerHeight;
+
 };
 
 var simulation = new Simulation();
 var graphics = new Graphics();
 var controller = new Controller();
 
-function setPlanets(state){
-    simulation.planets = [];
-    for (i = 0; i < state.length; i++) {
-        let prpt = state[i]
-        let planet = new Planet(prpt.size)
-        planet.pos = {x:prpt.pos.x + window.innerWidth/2,y:prpt.pos.y + window.innerHeight/2}
-        planet.color = prpt.color
-        planet.vel = {x:prpt.vel.x,y:prpt.vel.y}
-        planet.static = prpt.static
-        simulation.planets.push(planet)
-    }
-}
 function update(){
     graphics.clear();
     simulation.gravity();
@@ -271,9 +267,12 @@ function update(){
         let p = new Planet(controller.object.size);
         p.pos = {x:controller.object.pos.x,y:controller.object.pos.y}
         let pos = {x:controller.mouse.pos.x, y:controller.mouse.pos.y};
-        dx = controller.object.pos.x - pos.x;
-        dy = controller.object.pos.y - pos.y;
-        p.vel = {x:dx, y:dy};
+        dx = (controller.object.pos.x - pos.x);
+        dy = (controller.object.pos.y - pos.y);
+        p.vel = {
+            x:dx/simulation.dt/10,
+            y:dy/simulation.dt/10
+        };
         let pred = simulation.gravity_prediction(p, 300);
 
         graphics.draw_prediction(pred, 0.5, controller.object.color);
@@ -282,11 +281,17 @@ function update(){
     simulation.merge();
 };
 
+//mouse
 canvas.addEventListener("mousedown", function(ev){controller.mousedown(ev)});
 canvas.addEventListener("mouseup", function(ev){controller.mouseup(ev)});
 canvas.addEventListener("mousemove", function(ev){controller.mousemove(ev)});
 canvas.addEventListener("wheel", function(ev){controller.wheel(ev)});
-canvas.addEventListener('scroll', function(){window.scrollTo(0,0)});
+
+canvas.addEventListener("touchstart", function(ev){controller.mousedown(ev)});
+canvas.addEventListener("touchend", function(ev){controller.mouseup(ev)});
+canvas.addEventListener("touchmove", function(ev){controller.mousemove(ev)});
+
+window.addEventListener('scroll', function(){window.scrollTo(0,0)});
 window.addEventListener("resize", resize);
 window.addEventListener("load", update);
 

@@ -1,20 +1,64 @@
-html, body {margin: 0; height: 100%; overflow: hidden;}
-canvas {background-color:#eee}
+html, body {
+    margin: 0; 
+    height: 100%; 
+    overflow: hidden;
+    background-color: #eee;
+}
+canvas {
+    background-color:#eee
+}
 
-#top_div {
+#top_left_div {
     position: absolute;
-    top: 50;
-    left: 50;
+    top: 3%;
+    left: 5%;
     z-index: 10;
 }
-#top_div h1 {
+#top_right_div {
+    position: absolute;
+    top: 3%;
+    right: 5%;
+    z-index: 10;
+}
+#top_right_div div {
+    margin: 5px;
+    float: right;
+    clear: right;
+}
+
+#bot_div {
+    position: absolute;
+    bottom: 3%;
+    right: 5%;
+    z-index: 10;
+}
+
+.text_div h1,label {
     color:darkgray;
-    font-family: 'Baloo Chettan 2', cursive;
+    font-family: 'Play', sans-serif;
     font-size: 1rem;
 }
-select {
+.text_div a {
+    color:#343a40;
+    text-shadow: 0 .05rem .1rem rgba(0, 0, 0, .5);
+    text-decoration: none;
+    font-family: 'Play', sans-serif;
+    font-size: 1.5rem;
+}
+.text_div select,input {
     color:black;
-    font-family: 'Baloo Chettan 2', cursive;
+    font-family: 'Play', sans-serif;
     font-size: 1rem;
+}
+
+
+.github-link {
+    text-decoration: none;
+    color: white;
+    padding: 10px;
+    background-color: #343a40;
+    border-radius: 3px;
+    font-family: 'Play', sans-serif;
+    font-size: medium;
 }
 

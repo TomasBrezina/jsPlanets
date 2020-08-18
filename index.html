@@ -1,27 +1,106 @@
-<link rel="stylesheet" type="text/css" href="style.css">
-<link href="https://fonts.googleapis.com/css2?family=Baloo+Chettan+2&display=swap" rel="stylesheet">
+<!doctype html>
 <html lang="en">
-    <body>
-        <div id="top_div">
-            <h1>Controls: Click, Move & Wheel</h1>
-            <select id="select">
-                <option value="sun_and_earth">Sun and earth</option>
-                <option value="two_planets">Two planets</option>
-                <option value="empty">Empty</option>
-            </select>
+  <head>
+    <meta charset="utf-8">
+    
+    <link href="https://fonts.googleapis.com/css2?family=Play:wght@400;700&display=swap" rel="stylesheet">
+    <link href="https://stackpath.bootstrapcdn.com/font-awesome/4.7.0/css/font-awesome.min.css" rel="stylesheet" integrity="sha384-wvfXpqpZZVQGK6TAh5PVlGOfQNHSoD2xbE+QkPxCAFlNEevoEH3Sl0sibVcOQVnN" crossorigin="anonymous">
+    <link href="style.css" rel="stylesheet" type="text/css">
+    
+    <title>jsPlanets</title> 
+  </head>
+
+  <body>
+    <div id="top_left_div" class="text_div">
+        <a href="http://brez.cz">brez.cz</a>
+        <h1>Controls: Click, Move & Wheel</h1>
+        <select id="select">
+            <option value="solar_system">Solar system</option>
+            <option value="sun_and_earth">Sun and earth</option>
+            <option value="three_body">Three body</option>
+            <option value="empty">Empty</option>
+        </select>
+    </div>  
+
+    <div id="top_right_div" class="text_div">
+        <div>
+            <label>Gravity:</label>
+            <input id="param_gravity" type="number" min="1" max="100" step="1" value="50"  required>
+        </div>
+        <div>
+            <label>Time:</label>
+            <input id="param_dt" type="number" min="0.01" max="1" step="0.01" value="0.05" required>
+        </div>
+        <div>
+            <input id="param_submit" type="button" value="Set">
         </div>  
-        <canvas id="ctx"></canvas>
-        <script src="code.js"></script>  
-        <script>
-            var selector = document.getElementById("select");
-            selector.onchange = function(){
-                let option = selector.options[selector.selectedIndex].value;
-                setPlanets(states[option])
+    </div>  
+
+    <div id="bot_div">
+        <a href="https://github.com/aTom995/jsPlanets" class="github-link">
+            <i class="fa fa-github"></i>
+            <span>Github repository</span>
+        </a>
+    </div>
+
+    <canvas id="ctx"></canvas>
+
+    <script src="code.js"></script>  
+    <script>
+        //set state
+        function setPlanets(state){
+            //change gui
+            param_inp.gravity_constant.value = state.settings.gravity_constant
+            param_inp.dt.value = state.settings.dt
+            //clear
+            simulation.planets = [];
+            //stg
+            let settings = state.settings;
+            simulation.gravity_constant = settings.gravity_constant;
+            simulation.dt = settings.dt;
+            //planets
+            let planets = state.planets;
+            for (i = 0; i < planets.length; i++) {
+                let prpt = planets[i];
+                let planet = new Planet(prpt.size,simulation.mass_dim);
+                planet.pos = {x:prpt.pos.x + window.innerWidth/2,y:prpt.pos.y + window.innerHeight/2}
+                planet.color = prpt.color;
+                planet.vel = {x:prpt.vel.x,y:prpt.vel.y}
+                planet.static = prpt.static;
+                simulation.planets.push(planet);
             }
-            // pos from middle of the screen
-            states = {
-                empty : [],
-                sun_and_earth : [
+        }
+
+
+        var param_inp = {
+            "gravity_constant" : document.getElementById("param_gravity"),
+            "dt" : document.getElementById("param_dt")
+        }
+        document.getElementById("param_submit").onclick = function(){
+            simulation.gravity_constant = parseInt(param_inp.gravity_constant.value)
+            simulation.dt = parseFloat(param_inp.dt.value)
+
+        }
+        var selector = document.getElementById("select");
+        selector.onchange = function(){
+            let option = selector.options[selector.selectedIndex].value;
+            setPlanets(states[option])
+        }
+        // pos from middle of the screen
+        states = {
+            empty : {
+                "settings" : {
+                    "gravity_constant" : 1,
+                    "dt" : 0.05
+                },
+                "planets" : []
+            },
+            sun_and_earth : {
+                "settings" : {
+                    "gravity_constant" : 1,
+                    "dt" : 0.05
+                },
+                "planets" : [
                     {
                         pos : {x:0, y:0},
                         size : 40,
@@ -43,76 +122,99 @@
                         vel : {x:0,y:70},
                         static : false
                     }
-                ],
-                two_planets : [
+                ]
+            },
+            three_body : {
+                "settings" : {
+                    "gravity_constant" : 1,
+                    "dt" : 0.1
+                },
+                "planets" : [
                     {
-                        pos : {x:-100, y:0},
-                        size : 50,
-                        color : "#2C3E50",
-                        vel : {x:0,y:32},
+                        pos : {x:0, y:-100},
+                        size : 18,
+                        color : "#AC2B2B",
+                        vel : {x:10,y:0},
                         static : false
                     },
                     {
-                        pos : {x:100, y:0},
-                        size : 50,
-                        color : "#2C3E50",
-                        vel : {x:0,y:-32},
+                        pos : {x:-86.6, y:50},
+                        size : 18,
+                        color : "#2B5EAC",
+                        vel : {x:-5,y:-8.66},
                         static : false
                     },
                     {
-                        pos : {x:0, y:0},
-                        size : 5,
-                        color : "#2C3E50",
-                        vel : {x:0,y:0},
+                        pos : {x:86.6, y:50},
+                        size : 18,
+                        color : "#2BAC5E",
+                        vel : {x:-5,y:8.66},
                         static : false
                     },
-                ],
-                solar_system : [
+
+                ]
+            },
+            solar_system : {
+                "settings" : {
+                    "gravity_constant" : 1,
+                    "dt" : 0.05
+                },
+                "planets" : [
                     {
                         //sun
                         pos : {x:0, y:0},
-                        size : 30,
+                        size : 60,
                         color : "#E6E600",
                         vel : {x:0,y:0},
                         static : true
                     },
                     {
                         //mercury
-                        pos : {x:57, y:0},
-                        size : 1,
+                        pos : {x:80, y:0},
+                        size : 5,
                         color : "#5F83A4",
-                        vel : {x:0,y:50},
+                        vel : {x:0,y:93},
                         static : false
                     },
                     {
                         //venus
-                        pos : {x:-100, y:0},
-                        size : 2,
+                        pos : {x:-170, y:0},
+                        size : 10,
                         color : "#BAC3C1",
-                        vel : {x:0,y:-38},
+                        vel : {x:0,y:-63},
                         static : false
                     },
                     {
                         //earth
-                        pos : {x:150, y:0},
-                        size : 2,
-                        color : "#0d98ba ",
-                        vel : {x:0,y:30.8},
+                        pos : {x:290, y:0},
+                        size : 10,
+                        color : "#0d98ba",
+                        vel : {x:0,y:49},
+                        static : false
+                    },
+                    {
+                        //moon
+                        pos : {x:290, y:20},
+                        size : 3,
+                        color : "#BAC3C1",
+                        vel : {x:12,y:49},
                         static : false
                     },
                     {
                         //mars
-                        pos : {x:250, y:0},
-                        size : 1.5,
+                        pos : {x:-420, y:0},
+                        size : 5,
                         color : "#D35400",
-                        vel : {x:0,y:23},
+                        vel : {x:0,y:-40.5},
                         static : false
                     },
-                   
                 ]
             }
-            setPlanets(states.solar_system);
-        </script> 
-    </body>
+        }
+        setPlanets(states.solar_system)
+    </script> 
+  </body>
 </html>
+
+
 
